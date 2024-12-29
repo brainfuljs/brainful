@@ -1,0 +1,22 @@
+.advantages {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.container {
+  justify-content: center;
+}
+
+.card {
+  padding: 1rem;
+
+  background-color: var(--b-card-advantages-background-color);
+  border-radius: 10px;
+}
+
+.logo {
+  width: 50%;
+  height: auto;
+}

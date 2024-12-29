@@ -1,0 +1,19 @@
+.hero {
+  position: relative;
+
+  padding: 4rem 0;
+  overflow: hidden;
+
+  text-align: center;
+}
+
+@media screen and (width <= 996px) {
+  .hero {
+    padding: 2rem;
+  }
+}
+
+.description {
+  font-size: 1rem;
+  line-height: 1.4;
+}

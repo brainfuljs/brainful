@@ -1,0 +1,43 @@
+{
+  "name": "@brainfuljs/build-tools",
+  "version": "0.1.0",
+  "description": "Brainful Build Tools",
+  "keywords": ["Brainful"],
+  "author": {
+    "name": "Gurov Dmitriy",
+    "email": "gurovdmitriy1991@gmail.com",
+    "url": "https://github.com/GurovDmitriy"
+  },
+  "public": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/brainfuljs/brainful/issues",
+    "email": "brainfuljs@gmail.com"
+  },
+  "homepage": "https://github.com/brainfuljs/brainful#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainfuljs/brainful.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "@brainfuljs/build-tools": "index.js"
+  },
+  "scripts": {
+    "start": "npx @brainfuljs/build-tools",
+    "postinstall": "echo 'For usage package run: npx @brainfuljs/build-tools@latest'"
+  },
+  "dependencies": {
+    "inquirer": "^10.2.2"
+  },
+  "devDependencies": {},
+  "volta": {
+    "node": "22.12.0"
+  },
+  "engines": {
+    "node": ">= 22"
+  }
+}

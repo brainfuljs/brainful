@@ -1,0 +1,35 @@
+{
+  "name": "@brainfuljs/build-tools-playground",
+  "version": "0.1.0",
+  "description": "Brainful Build Tools Playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@brainfuljs/brainful": "^0.1.0",
+    "mustache": "^4.2.0",
+    "immutable": "^4.3.7",
+    "inversify": "^6.0.2",
+    "nanoid": "^5.0.8",
+    "ramda": "^0.30.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.3",
+    "@types/ramda": "^0.30.2",
+    "@types/mustache": "^4.2.5",
+    "vite": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "volta": {
+    "node": "22.12.0"
+  },
+  "engines": {
+    "node": ">= 22"
+  }
+}

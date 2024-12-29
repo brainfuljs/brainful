@@ -1,0 +1,39 @@
+Inversion of Control:
+  label: Inversion of Control
+  permalink: /inversion-of-control
+  description: Inversion of Control
+
+IoC Container:
+  label: IoC Container
+  permalink: /ioc-container
+  description: IoC Container
+
+Dependency Inversion:
+  label: Dependency Inversion
+  permalink: /dependency-inversion
+  description: Dependency Inversion
+
+Dependency Injection:
+  label: Dependency Injection
+  permalink: /dependency-injection
+  description: Dependency Injection
+
+Inversify:
+  label: Inversify
+  permalink: /Inversify
+  description: Inversify
+
+Books:
+  label: Books
+  permalink: /Books
+  description: Books
+
+Mark Seemann:
+  label: Mark Seemann
+  permalink: /Mark Seemann
+  description: Mark Seemann
+
+Remo H. Jansen:
+  label: Remo H. Jansen
+  permalink: /Remo H. Jansen
+  description: Remo H. Jansen

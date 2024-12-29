@@ -23,6 +23,7 @@
   "license": "MIT",
   "workspaces": [
     "docs",
+    "examples/*",
     "packages/*",
     "packages/build-tools",
     "packages/build-tools/base",
@@ -31,10 +32,10 @@
   "scripts": {
     "build": "npx lerna run build",
     "test": "npx lerna run test",
-    "semver": "npx lerna version",
-    "publish": "npx lerna publish from-package --no-private",
     "lint": "npx lerna run lint",
     "lint:prettier": "prettier --write \"**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,md,json}\" --ignore-path .prettierignore",
+    "semver": "npx lerna version",
+    "publish": "npx lerna publish from-package --no-private",
     "update": "ncu --interactive --format group"
   },
   "devDependencies": {

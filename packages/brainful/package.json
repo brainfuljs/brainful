@@ -1,0 +1,91 @@
+{
+  "name": "@brainfuljs/brainful",
+  "version": "0.1.0",
+  "description": "Library for web user interfaces",
+  "keywords": [
+    "Brainful"
+  ],
+  "author": {
+    "name": "Gurov Dmitriy",
+    "email": "gurovdmitriy1991@gmail.com",
+    "url": "https://github.com/GurovDmitriy"
+  },
+  "public": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/brainfuljs/brainful/issues",
+    "email": "brainfuljs@gmail.com"
+  },
+  "homepage": "https://github.com/brainfuljs/brainful#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainfuljs/brainful.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/lib/node/brainful.cjs",
+  "module": "dist/lib/esm/brainful.js",
+  "types": "dist/types/brainful.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "require": "./dist/types/brainful.d.ts",
+        "import": "./dist/types/brainful.d.ts"
+      },
+      "default": {
+        "require": "./dist/lib/node/brainful.cjs",
+        "import": "./dist/lib/esm/brainful.js"
+      }
+    }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --write \"**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,md,json}\" --ignore-path .prettierignore"
+  },
+  "dependencies": {
+    "immutable": "^4.3.7",
+    "inversify": "^6.0.2",
+    "nanoid": "^5.0.8",
+    "ramda": "^0.30.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/mustache": "^4.2.5",
+    "@types/ramda": "^0.30.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.15.0",
+    "jsdom": "^25.0.1",
+    "globals": "^15.12.0",
+    "mustache": "^4.2.0",
+    "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "typescript-eslint": "^8.15.0",
+    "vite": "^6.0.1",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.8",
+    "typescript": "^5.7.2"
+  },
+  "volta": {
+    "node": "22.12.0"
+  },
+  "engines": {
+    "node": ">= 22"
+  }
+}

@@ -268,9 +268,9 @@ fabric.properties
 ##########################
 # User
 ##########################
-tasks.md
 .idea
 .nx
 packages
 docs
+examples
 package-lock.json

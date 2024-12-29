@@ -1,0 +1,68 @@
+:root {
+  --b-color-giacomo-agostini: #222222;
+  --b-color-kenny-roberts: #030303;
+  --b-color-mika-duhan: #020202;
+  --b-color-valentino-rossi: #464646;
+  --b-color-dani-pedrosa: #262626;
+  --b-color-casey-stoner: #272727;
+  --b-color-horhe-lorenzo: #999999;
+  --b-color-nicky-hayden: #696969;
+  --b-color-alex-espargaro: #414141;
+  --b-color-marc-marquez: #939393;
+  --b-color-jorge-martin: #313131;
+  --b-color-francesco-bagnaia: #212121;
+
+  --ifm-color-primary: #444444;
+  --ifm-color-primary-dark: #3b3b3b;
+  --ifm-color-primary-darker: #333333;
+  --ifm-color-primary-darkest: #2a2a2a;
+  --ifm-color-primary-light: #555555;
+  --ifm-color-primary-lighter: #666666;
+  --ifm-color-primary-lightest: #777777;
+
+  --ifm-link-color: var(--b-color-marc-marquez);
+  --ifm-navbar-link-hover-color: var(--b-color-marc-marquez);
+
+  --ifm-footer-background-color: var(--ifm-background-color);
+  --ifm-hero-background-color: var(--ifm-background-color);
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: #ffffff;
+
+  --b-card-advantages-background-color: #ebedf0;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #b0b0b0;
+  --ifm-color-primary-dark: #a0a0a0;
+  --ifm-color-primary-darker: #909090;
+  --ifm-color-primary-darkest: #808080;
+  --ifm-color-primary-light: #c2c2c2;
+  --ifm-color-primary-lighter: #d0d0d0;
+  --ifm-color-primary-lightest: #e5e5e5;
+
+  --ifm-link-color: var(--b-color-marc-marquez);
+  --ifm-navbar-link-hover-color: var(--b-color-marc-marquez);
+
+  --ifm-footer-background-color: var(--ifm-background-color);
+  --ifm-hero-background-color: var(--ifm-background-color);
+  --ifm-navbar-background-color: var(--ifm-background-color);
+  --ifm-navbar-shadow: var(--ifm-background-color);
+
+  --b-card-advantages-background-color: var(--b-color-casey-stoner);
+}
+
+main {
+  background-color: var(--b-background-color);
+}
+
+.text-marc-marquez {
+  color: var(--b-color-marc-marquez);
+}
+
+.text-underline {
+  text-decoration: underline;
+}
+
+.navbar__link {
+  display: inline-flex;
+}
