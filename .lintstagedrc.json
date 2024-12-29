@@ -1,0 +1,5 @@
+{
+  "./*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,md,json}": [
+    "prettier --write --ignore-path .prettierignore"
+  ]
+}
