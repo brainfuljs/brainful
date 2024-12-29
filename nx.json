@@ -11,12 +11,12 @@
       "cache": true
     },
     "build": {
-      "dependsOn": ["lint"],
+      "dependsOn": [],
       "inputs": ["all", "^public"],
       "cache": true
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": [],
       "inputs": ["all", "^public"],
       "cache": true
     }

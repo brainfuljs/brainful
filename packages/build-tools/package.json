@@ -2,7 +2,9 @@
   "name": "@brainfuljs/build-tools",
   "version": "0.1.0",
   "description": "Brainful Build Tools",
-  "keywords": ["Brainful"],
+  "keywords": [
+    "Brainful"
+  ],
   "author": {
     "name": "Gurov Dmitriy",
     "email": "gurovdmitriy1991@gmail.com",
@@ -33,7 +35,6 @@
   "dependencies": {
     "inquirer": "^10.2.2"
   },
-  "devDependencies": {},
   "volta": {
     "node": "22.12.0"
   },
