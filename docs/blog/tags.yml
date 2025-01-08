@@ -23,11 +23,6 @@ Inversify:
   permalink: /Inversify
   description: Inversify
 
-Books:
-  label: Books
-  permalink: /Books
-  description: Books
-
 Mark Seemann:
   label: Mark Seemann
   permalink: /Mark Seemann

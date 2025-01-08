@@ -9,11 +9,12 @@ tags:
     Dependency Inversion,
     Dependency Injection,
     Inversify,
-    Books,
     Mark Seemann,
     Remo H. Jansen,
   ]
 ---
+
+This article provides an overview of the key points that need to be covered when studying the topic of Inversion of Control.
 
 Inversion of Control (IoC) is a fundamental design principle in software engineering that shifts the
 control of object creation and flow of execution from the application code to an external framework or container.<!-- truncate -->
@@ -31,7 +32,6 @@ lifecycle of their dependencies.
 ## Misconceptions about DI
 
 Several common misconceptions exist regarding Dependency Injection:
-
 - DI is only about late binding: While DI often involves late binding, its primary purpose is to reduce tight coupling between components.
   This flexibility allows for easier maintenance and adaptation of code.
 - DI is only relevant for unit testing: Although DI significantly aids in creating testable code,
@@ -65,35 +65,150 @@ function execute(serviceA) {
 
 ## Advantages of Dependency Injection
 
-- Late Binding: Allows for replacing services with different implementations without modifying existing code.
-- Extensibility: Simplifies the reuse and modification of components.
-- Parallel Development: Different teams can work on various parts of the system independently.
-- Maintainability: Code becomes clearer and easier to support.
-- Testability: Facilitates unit testing by allowing dependencies to be easily mocked or substituted.
+### Late Binding  
+
+Allows for replacing services with different implementations without modifying existing code.
+Late binding refers to the ability to resolve dependencies at runtime rather than at compile time. 
+This flexibility allows developers to replace services with different implementations without modifying the existing codebase. 
+For example, if you need to switch from one logging service to another, you can do so by changing the configuration in the DI container without 
+touching the classes that utilize the logger. This promotes a more adaptable architecture that can easily accommodate changes in requirements 
+or technology.
+
+### Extensibility   
+
+Simplifies the reuse and modification of components.
+Dependency Injection enhances extensibility by allowing developers to add new features or components without disrupting existing functionality. 
+When components are loosely coupled through DI, new implementations can be introduced seamlessly. 
+For instance, if a new payment processing service is required, it can be implemented and injected into the application without 
+altering the core logic of existing services. This capability encourages a modular design where components can evolve independently.
+
+### Parallel Development
+
+With DI, different teams can work on various parts of a system independently. 
+Since components are decoupled and interact through well-defined interfaces, teams can develop, 
+test, and deploy their components without waiting for others to finish their tasks. 
+This parallel development approach accelerates project timelines and enhances collaboration among teams, as they can focus on 
+their specific areas of expertise without being hindered by interdependencies.
+
+### Maintainability
+
+Code becomes clearer and easier to support.
+Code maintainability is significantly improved through Dependency Injection. 
+By reducing tight coupling between classes, DI makes it easier to understand and modify code. 
+When dependencies are clearly defined and managed externally, developers can quickly identify where changes 
+need to be made when issues arise or when enhancements are required. This clarity leads to less time spent on debugging and more efficient updates, 
+ultimately resulting in a more robust codebase.
+
+### Testability
+
+One of the most significant benefits of Dependency Injection is its impact on testability. 
+By allowing dependencies to be easily mocked or substituted, DI simplifies unit testing. 
+Developers can create mock implementations of services and inject them into classes under test, enabling them to isolate functionality 
+and verify behavior without relying on actual implementations or external systems. This leads to more reliable tests and encourages 
+a test-driven development (TDD) approach, which enhances overall software quality. 
 
 ## Types of Injection
 
-- Constructor Injection: Dependencies are provided through constructor parameters.
-- Property Injection: Dependencies are set through public properties.
-- Method Injection: Dependencies are passed as arguments to methods.
+### Constructor Injection
+
+Constructor Injection is one of the most common and widely used methods for implementing Dependency Injection. 
+In this approach, dependencies are provided to a class through its constructor parameters. 
+This method ensures that a class receives all its required dependencies at the time of instantiation, promoting immutability and 
+making it clear what dependencies a class needs to function properly.
+
+### Property Injection
+
+Property Injection allows dependencies to be set through public properties of a class after the object has been instantiated. 
+This method provides flexibility in how dependencies are assigned, as they can be modified at any point in the object's lifecycle.
+
+### Method Injection
+
+Method Injection involves passing dependencies as arguments to specific methods of a class. 
+This approach is useful when a dependency is needed only for certain operations rather than throughout the entire lifecycle of the object.
 
 ## What Can Be Injected and What Cannot
 
-It's crucial to distinguish between stable and unstable dependencies:
+When implementing Dependency Injection (DI), it is crucial to distinguish between stable and unstable dependencies, 
+as this distinction can significantly impact the design and maintainability of your application.
 
-- Stable Dependencies: Classes with predictable behavior (e.g., utility classes).
-- Unstable Dependencies: Classes whose behavior depends on context or time (e.g., services interacting with external APIs).
+### Stable Dependencies
+
+Stable dependencies refer to classes or components that exhibit predictable behavior and do not change frequently. 
+These are typically well-defined utility classes or services that provide consistent functionality over time.
+
+Characteristics of Stable Dependencies:
+
+- Predictability: They behave consistently, making them reliable for other components to depend on.
+- Low Risk of Change: Changes in stable dependencies are infrequent, reducing the risk of introducing bugs in dependent components.
+- Examples: Utility classes for logging, configuration management, or mathematical calculations are often stable dependencies.
+
+By relying on stable dependencies, developers can create a solid foundation within their applications, minimizing the potential for 
+disruptions when changes occur.
+
+### Unstable Dependencies
+
+Unstable dependencies, on the other hand, are classes or components whose behavior can vary based on context or time. 
+These dependencies often interact with external systems, such as APIs or databases, making them more susceptible to changes.
+
+Characteristics of Unstable Dependencies:
+- Context-Dependent Behavior: Their functionality may change based on external factors, such as user input or network availability.
+- Higher Risk of Change: Frequent modifications or updates to unstable dependencies can lead to cascading effects on other components that rely on them.
+- Examples: Services that interact with external APIs, third-party libraries, or components that require real-time data are typically considered unstable.
+
+Understanding the nature of your dependencies allows you to design your application architecture more effectively. 
+By minimizing reliance on unstable dependencies in critical areas of your application, you can enhance stability and reduce the risk of errors.
 
 ## Managing Object Lifecycle
 
-The lifecycle management of objects in the context of DI involves controlling their creation, usage, and destruction.
-Various lifecycle management strategies include:
+Managing the lifecycle of objects in the context of Dependency Injection (DI) involves controlling how and when instances of 
+dependencies are created, used, and disposed of. Proper lifecycle management is crucial for ensuring efficient resource 
+utilization and maintaining application performance. Various lifecycle management strategies include.
 
-- Singleton: A single instance is shared across the application.
-- Transient: A new instance is created each time it is requested.
-- Per Graph: Instances are created for each graph of objects.
-- Web Request Context: Instances are created for each web request.
-- Pooled: Instances are reused from a pool.
+### Singleton
+
+A Singleton is a design pattern where a single instance of a class is shared across the entire application. 
+This means that every time a dependency is requested, the same instance is returned. 
+Singleton instances are typically used for services that maintain global state or configuration settings.
+
+Advantages:
+- Resource Efficiency: Since only one instance exists, it can help conserve memory and other resources.
+- Consistency: Ensures that all components using the service share the same state and behavior.
+
+### Transient
+
+In the Transient lifecycle, a new instance of the dependency is created each time it is requested from the DI container. 
+This approach is suitable for lightweight, stateless services that do not need to maintain any shared state.
+
+Advantages:
+- Isolation: Each consumer receives its own instance, preventing unintended side effects from shared state.
+- Flexibility: Ideal for services that require unique configurations or states.
+
+### Per Graph
+
+The Per Graph lifecycle creates instances for each graph of objects. 
+This means that if multiple components depend on the same service within a single graph of dependencies, 
+they will receive the same instance. However, different graphs will get different instances.
+
+Advantages:
+- Scoped Sharing: Allows sharing instances within a specific context while isolating them from other contexts.
+- Efficient Resource Use: Reduces overhead by reusing instances within a defined scope.
+
+### Pooled
+
+The Pooled lifecycle manages instances by reusing them from a pool. 
+When a dependency is requested, an existing instance from the pool is provided if available; otherwise, a new instance is 
+created and added to the pool. This approach can improve performance by reducing instantiation overhead for frequently used services.
+
+### Web Request Context
+
+In web applications, the Web Request Context lifecycle creates a new instance of a dependency for each web request. 
+This ensures that dependencies are scoped to individual requests, which is particularly useful for managing stateful services 
+like session management or user authentication.
+
+Advantages:
+- Request Isolation: Each web request has its own set of dependencies, preventing data leakage between requests.
+- State Management: Facilitates handling user-specific data during a request's lifecycle.
+
 
 ## Inversion of Control (IoC) and Dependency Injection (DI)
 
@@ -101,22 +216,52 @@ Inversion of Control is a general design principle that separates implementation
 Dependency Injection is a specific implementation of this principle. The core idea is to use interfaces instead of concrete classes,
 enabling easy replacement of implementations without modifying dependent code.
 
-## Patterns of Dependency Injection
-
-- Constructor Injection
-- Property Injection
-- Method Injection
-- Ambient Context
-- Each pattern has its own use cases depending on project requirements.
-
 ## Anti-patterns in DI
 
-Some common anti-patterns include:
+While Dependency Injection (DI) offers numerous benefits, there are also common anti-patterns that can undermine its effectiveness. 
+Understanding these anti-patterns is essential for maintaining clean and maintainable code. Here are some of the most prevalent anti-patterns in DI.
 
-- Service Locator: Using a global object to obtain dependencies instead of explicitly defining them.
-- Control Freak: A class that excessively controls its dependencies.
-- Bastard Injection: Misusing DI where dependencies are passed implicitly or chaotically.
-- Constrained Construction: Overloading constructors with too many parameters.
+### Service Locator
+
+The Service Locator pattern involves using a global object to obtain dependencies instead of explicitly defining them through injection. 
+While it may seem convenient, this approach obscures the dependencies of a class and can lead to runtime errors if dependencies are not 
+registered correctly.
+
+Problems with Service Locator:
+- Hidden Dependencies: The class does not clearly communicate what its dependencies are, making it difficult to understand how it functions without inspecting the code.
+- Runtime Exceptions: If a required service is not registered in the locator, it can lead to runtime exceptions that are harder to debug.
+- Testing Challenges: Unit testing becomes more complex since the class relies on a static service locator, making it difficult to mock dependencies.
+
+### Control Freak
+
+A class that excessively controls its dependencies is referred to as a Control Freak. 
+This occurs when a class directly instantiates its dependencies rather than accepting them through DI. 
+This tight coupling makes it difficult to switch implementations or mock dependencies for testing.
+
+Problems with Control Freak:
+- Tight Coupling: The class is tightly coupled to specific implementations, making it challenging to change or replace them.
+- Difficult Testing: Unit testing becomes problematic because the class cannot be easily mocked or isolated from its dependencies.
+
+### Bastard Injection
+
+Bastard Injection refers to the misuse of DI where dependencies are passed implicitly or chaotically. 
+This can occur when developers attempt to inject too many dependencies or when they rely on context or global state instead of clear interfaces.
+
+Problems with Bastard Injection:
+- Confusion: It becomes unclear which dependencies are required for a class, leading to confusion and maintenance challenges.
+- Violation of Principles: This approach often violates principles such as Single Responsibility Principle (SRP) and can lead to bloated classes.
+
+### Constrained Construction
+Constrained Construction occurs when constructors are overloaded with too many parameters. 
+This often indicates that a class has too many responsibilities and violates the Single Responsibility Principle (SRP).
+
+Problems with Constrained Construction:
+- Complexity: Classes with numerous constructor parameters become complex and difficult to manage.
+- Maintenance Issues: Changes in one dependency may require modifications in multiple places throughout the codebase.
+
+By being aware of these anti-patterns, developers can avoid common pitfalls associated with Dependency Injection. 
+By adhering to best practices and ensuring clear communication of dependencies, applications can maintain flexibility, testability, 
+and overall code quality.
 
 ## Inversify
 
