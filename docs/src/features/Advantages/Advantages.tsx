@@ -24,7 +24,7 @@ export default function Advantages() {
 
     {
       caption: "Ramda",
-      description: "Function Programming with Ramda",
+      description: "Functional Programming with Ramda",
       image: "img/ramda.png",
     },
 
