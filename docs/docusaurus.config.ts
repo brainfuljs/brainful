@@ -56,6 +56,13 @@ const config: Config = {
       },
     },
     {
+      tagName: "meta",
+      attributes: {
+        name: "apple-mobile-web-app-title",
+        content: "Brainful",
+      },
+    },
+    {
       tagName: "link",
       attributes: {
         rel: "manifest",
@@ -173,8 +180,8 @@ const config: Config = {
         },
       ],
       copyright: `
-       Released under the MIT License</br>
-       Copyright © 2024-PRESENT Gurov Dmitriy, and Brainful.js contributors
+       Released under the MIT License. Built with Docusaurus.</br>
+       Copyright © 2024-PRESENT Gurov Dmitriy, and Brainful.js contributors.
        `,
     },
     prism: {
