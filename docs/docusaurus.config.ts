@@ -181,7 +181,7 @@ const config: Config = {
       ],
       copyright: `
        Released under the MIT License. Built with Docusaurus.</br>
-       Copyright © 2024-PRESENT Gurov Dmitriy, and Brainful.js contributors.
+       Copyright © 2024-PRESENT Dmitriy Gurov, and Brainful.js contributors.
        `,
     },
     prism: {

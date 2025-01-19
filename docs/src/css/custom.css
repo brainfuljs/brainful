@@ -12,6 +12,8 @@
   --b-color-jorge-martin: #313131;
   --b-color-francesco-bagnaia: #212121;
 
+  --b-rxjs: #bd3185;
+
   --ifm-color-primary: #444444;
   --ifm-color-primary-dark: #3b3b3b;
   --ifm-color-primary-darker: #333333;
@@ -49,10 +51,6 @@
   --ifm-navbar-shadow: var(--ifm-background-color);
 
   --b-card-advantages-background-color: var(--b-color-casey-stoner);
-}
-
-main {
-  background-color: var(--b-background-color);
 }
 
 .text-marc-marquez {

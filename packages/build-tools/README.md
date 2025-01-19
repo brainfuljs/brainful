@@ -19,4 +19,4 @@ Take a small step on the way from a framework developer to a real front-end engi
 
 ## License
 
-[MIT](./LICENSE) License © 2024-Present [Gurov Dmitriy](https://github.com/GurovDmitriy)
+[MIT](./LICENSE) License © 2024-Present [Dmitriy Gurov](https://github.com/GurovDmitriy)
