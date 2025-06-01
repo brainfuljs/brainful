@@ -1,6 +1,6 @@
 {
   "name": "@brainfuljs/build-tools-playground",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Brainful Build Tools Playground",
   "type": "module",
   "private": true,
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@brainfuljs/brainful": "^0.1.0",
+    "@brainfuljs/brainful": "^0.1.1",
     "immutable": "^4.3.7",
     "inversify": "^6.0.2",
     "mustache": "^4.2.0",
