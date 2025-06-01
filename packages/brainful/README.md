@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://brainfuljs.dev">
-<img src="https://github.com/user-attachments/assets/eec3e8ea-63dd-4e87-99e1-11ad09b2b9a6" height="150">
+<img src="https://github.com/brainfuljs/brainful/raw/main/art/brainfuljs.svg" height="150">
 </a>
 </p>
 
@@ -19,4 +19,4 @@ Take a small step on the way from a framework developer to a real front-end engi
 
 ## License
 
-[MIT](./LICENSE) License © 2024-Present [Dmitriy Gurov](https://github.com/GurovDmitriy)
+[Apache-2.0](./LICENSE) License © 2024-Present [Dmitriy Gurov](https://github.com/GurovDmitriy)

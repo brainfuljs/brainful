@@ -189,8 +189,10 @@ const config: Config = {
         },
       ],
       copyright: `
-       Released under the MIT License. Built with Docusaurus.</br>
-       Copyright © 2024-PRESENT Dmitriy Gurov, and Brainful.js contributors.
+       Code licensed under an <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a> License.
+       Documentation licensed under <a href="https://creativecommons.org/licenses/by/4.0/" >CC BY 4.0</a>.</br>
+       Built with <a href="https://docusaurus.io/">Docusaurus</a>.</br>
+       Copyright © 2024-PRESENT Dmitriy Gurov, and <a href="https://github.com/brainfuljs/brainful">Brainful</a> contributors.
        `,
     },
     prism: {

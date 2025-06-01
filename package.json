@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/brainfuljs/brainful.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "workspaces": [
     "docs",
     "examples/*",

@@ -23,7 +23,7 @@
     "type": "git",
     "url": "git+https://github.com/brainfuljs/brainful.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/lib/node/brainful.cjs",
   "module": "dist/lib/esm/brainful.js",

@@ -2,18 +2,14 @@
 slug: error-handling-fundamentals
 title: Error Handling Fundamentals
 authors: [GurovDmitriy, ElenaErokhina]
-tags:
-  [
-    RxJS,
-    Inversify,
-  ]
+tags: [RxJS, Inversify]
 ---
 
-Error handling is a tricky task, frameworks provide basic solutions, but they rarely cover all scenarios. 
+Error handling is a tricky task, frameworks provide basic solutions, but they rarely cover all scenarios.
 Errors come in various forms, and the handling logic is often duplicated and scattered throughout the code.
 To bring order to this process, a lot of code has to be written manually. <!-- truncate -->
 
-In this article, we will explore an approach that helps organize error handling and make it scalable. 
+In this article, we will explore an approach that helps organize error handling and make it scalable.
 It can be adapted to your own project, so you don’t have to worry about an unhandled exception breaking your application.
 
 The examples will use [RxJS](https://rxjs.dev/), [Inversify](https://inversify.io/), and React, but the principles can be applied to other tech stacks as well.
@@ -21,6 +17,7 @@ The examples will use [RxJS](https://rxjs.dev/), [Inversify](https://inversify.i
 ## Key Ideas
 
 As a result, our system will:
+
 - catch unhandled exceptions, network errors, and other failures
 - forward them to an error service
 - map them into a unified format and store them in a ready-to-use form
@@ -35,6 +32,7 @@ To make the material easier to understand, we will omit detailed typing but defi
 ### Base interface
 
 All errors will have:
+
 - a status to determine the category (e.g., 4xx/5xx)
 - a code as an identifier for analysis (e.g., mapped/http/not_found)
 - a message for displaying in the user interface
@@ -49,7 +47,7 @@ export interface ErrorCustom {
 
 ### Standard Type
 
-`ErrorMapped` is an interface to which errors are mapped after processing. 
+`ErrorMapped` is an interface to which errors are mapped after processing.
 It extends `ErrorCustom` and contains the original error for debugging or analysis.
 
 ```ts title="src/core/error/types.ts"
@@ -60,7 +58,7 @@ export interface ErrorMapped extends ErrorCustom {
 
 ### Additional Types
 
-As an example, we will implement `ErrorSchema` — an interface for a category of errors related to backend response validation. 
+As an example, we will implement `ErrorSchema` — an interface for a category of errors related to backend response validation.
 It will include an `issues` property containing details of the validation errors.
 
 ```ts title="src/core/error/types.ts"
@@ -69,12 +67,12 @@ export interface ErrorSchema extends ErrorCustom {
 }
 ```
 
-In real projects, there can be several such layers, and for each layer you can create your own error types by analogy 
+In real projects, there can be several such layers, and for each layer you can create your own error types by analogy
 with `ErrorSchema`: for example, ErrorAuth for authorization errors or `ErrorNetwork` for network-related issues.
 
 ### Parameters for Creating Errors
-Parameter contracts define what the error implementations will accept. They mirror the base types:
 
+Parameter contracts define what the error implementations will accept. They mirror the base types:
 
 ```ts title="src/core/error/types.ts"
 export interface ErrorParams {
@@ -128,16 +126,19 @@ export interface ErrorService {
 ```
 
 ### Summary
-The application introduces rules that modules above the core layer must follow. 
+
+The application introduces rules that modules above the core layer must follow.
 This is necessary to unify the handling of different types of errors.
-All exotic errors, such as `AxiosError` or errors from third-party libraries, should pass through the `ErrorMapper`. 
-You can create adapters that, at the `HTTP` layer, convert third-party errors into our own via the `ErrorFactory`. 
+All exotic errors, such as `AxiosError` or errors from third-party libraries, should pass through the `ErrorMapper`.
+You can create adapters that, at the `HTTP` layer, convert third-party errors into our own via the `ErrorFactory`.
 This way, we can control such errors from the core layer of the application.
 
 ## Classes
+
 If interfaces define the contract, then classes implement the logic based on these contracts.
 
 ### Custom Error
+
 `ErrorBase` is the base implementation of custom errors in the project.
 
 ```ts title="src/core/error/ErrorBase.ts"
@@ -156,10 +157,9 @@ export class ErrorBase implements ErrorCustom {
 }
 ```
 
-
-
 ### Error with Call Stack
-`ErrorHeavy` extends the standard `Error` class and implements the `ErrorCustom` interface. 
+
+`ErrorHeavy` extends the standard `Error` class and implements the `ErrorCustom` interface.
 It is intended for errors where preserving the call stack is important.
 
 ```ts title="src/core/error/ErrorHeavy.ts"
@@ -185,6 +185,7 @@ export class ErrorHeavy extends Error implements ErrorCustom {
 ```
 
 ### Error for the response validation
+
 `ErrorSchemaBase` is used for errors thrown in the `HTTP` layer when validating the backend response schema.
 
 ```ts title="src/core/error/ErrorSchemaBase.ts"
@@ -203,6 +204,7 @@ export class ErrorSchemaBase extends ErrorBase implements ErrorSchema {
 ```
 
 ### Adapter Error Class
+
 `ErrorMappedBase` represents an error after its original has been processed by the mapper.
 
 ```ts title="src/core/error/ErrorMappedBase.ts"
@@ -221,18 +223,18 @@ export class ErrorMappedBase extends ErrorBase implements ErrorMapped {
 ```
 
 ### Summary
-We have designed a class system that adheres to our contracts and is flexibly extensible — from the base class ErrorBase to 
+
+We have designed a class system that adheres to our contracts and is flexibly extensible — from the base class ErrorBase to
 specific implementations like `ErrorSchemaBase`.
 For errors where it is important to preserve the original information after mapping, we introduced the
 `ErrorHeavy` class — useful for detailed debugging.
 `ErrorMappedBase` is the final "unified" class for third-party errors.
-This separation allows for flexible and consistent error handling at different levels of the application, 
+This separation allows for flexible and consistent error handling at different levels of the application,
 ensuring ease of processing, logging, and displaying errors.
-
 
 ## Factories
 
-To systematize the error creation process, we will create a set of factories. 
+To systematize the error creation process, we will create a set of factories.
 All of them will implement the `ErrorFactory` interface — this ensures that the error creation process is consistent throughout the system.
 Each factory will be responsible for producing its own types of errors:
 
@@ -310,12 +312,14 @@ export class ErrorMappedBaseFactory
 ```
 
 ### Summary
-The logic for handling different types of errors can evolve in various directions, 
+
+The logic for handling different types of errors can evolve in various directions,
 so it’s best to avoid excessive generalization through a single universal factory.
-Creating separate factories for each error type helps maintain clarity and flexibility, 
+Creating separate factories for each error type helps maintain clarity and flexibility,
 simplifying the maintenance and extension of the error handling system.
 
 ## ErrorService
+
 `ErrorServiceDefault` is the main module for error mapping and notifying interested components of the application.
 
 ```ts title="src/core/error/ErrorServiceDefault.ts"
@@ -351,17 +355,20 @@ export class ErrorServiceDefault implements ErrorService {
 ```
 
 ### Summary
-A unified service allows centralized management and unification of errors. 
+
+A unified service allows centralized management and unification of errors.
 Interested modules only need to subscribe to the error stream in the service and respond promptly to errors in the system.
 
 ## Integration
+
 For each framework or environment, additional handlers or integration with existing tools may be required.
-Integration helps adapt the system to the specifics of the frameworks, intercept errors at all levels, 
+Integration helps adapt the system to the specifics of the frameworks, intercept errors at all levels,
 and maintain a unified approach to error handling throughout the application ecosystem.
 
 ### Global Error Catcher
-The main goal of the module is to start forwarding errors from the top level of the application to the error service. 
-In `React`, this can be the `useErrorHandler` function, which sets listeners on `window.onerror` and `window.onunhandledrejection` events. 
+
+The main goal of the module is to start forwarding errors from the top level of the application to the error service.
+In `React`, this can be the `useErrorHandler` function, which sets listeners on `window.onerror` and `window.onunhandledrejection` events.
 In `Angular`, it can be an extended error handling class.
 
 ```ts title="src/core/error/useErrorHandler.ts"
@@ -416,9 +423,10 @@ export function useErrorHandlerPrivate({ errorService, errorFactory }: Props) {
 ```
 
 ### Handling Patterns
-In `React`, it is common to create an error handling component by extending `Component`. We will call 
+
+In `React`, it is common to create an error handling component by extending `Component`. We will call
 it `ErrorBoundaryReact` — following the pattern it implements.
-`ErrorBoundaryReact` will catch errors in child components. 
+`ErrorBoundaryReact` will catch errors in child components.
 It is a universal wrapper — later, we will use it in one of our own providers.
 
 ```tsx title="src/core/error/ErrorBoundaryReact.tsx"
@@ -452,9 +460,10 @@ export class ErrorBoundaryReact extends Component<
 ```
 
 ### Summary
-Different environments may have layers that require integration with the error handling system. 
-However, this does not prevent connecting it similarly to `useErrorHandler` or `ErrorBoundaryReact`. 
-For example, in `Next.js`, you can integrate our service into the `error-global.tsx`, `error.tsx`, and `not-found.tsx` pages so 
+
+Different environments may have layers that require integration with the error handling system.
+However, this does not prevent connecting it similarly to `useErrorHandler` or `ErrorBoundaryReact`.
+For example, in `Next.js`, you can integrate our service into the `error-global.tsx`, `error.tsx`, and `not-found.tsx` pages so
 they pass error information to it.
 You can use these tools while configuring additional handlers to meet the requirements of your environment.
 
@@ -462,7 +471,7 @@ You can use these tools while configuring additional handlers to meet the requir
 
 ### Tokens
 
-We complete the error system architecture by configuring the `IoC` container 
+We complete the error system architecture by configuring the `IoC` container
 using [Inversify](https://inversify.io/) — a powerful dependency management tool. You can learn more about its setup for `React` in [this](/blog/inversion-of-control) article.
 For the container, we will define two tokens to enable flexible configuration of dependencies in the future.
 
@@ -500,13 +509,15 @@ export { container }
 ```
 
 ### Summary
-The example above demonstrates a basic approach to configuring the dependency container. 
-In real projects, the configuration and replacement of modules in the container can be significantly 
+
+The example above demonstrates a basic approach to configuring the dependency container.
+In real projects, the configuration and replacement of modules in the container can be significantly
 more complex and may include additional layers of abstraction, conditions, and settings.
 
 ## Domains Error
 
 ### ErrorMapper implementation
+
 We have come to creating a specific error mapper. The project may have several types of such mappers.
 
 ```ts title="src/domains/error/ErrorMapperCustom.ts"
@@ -518,7 +529,6 @@ import {
   type ErrorMapped,
   type ErrorMapper,
 } from "../../core/error"
-
 
 @injectable()
 export class ErrorMapperCustom implements ErrorMapper {
@@ -572,18 +582,20 @@ export class ErrorMapperCustom implements ErrorMapper {
 ```
 
 ### Global Error Pages Service
-If you want to hide the component tree and display a global fallback error page for certain 
-types of errors, you will need an `ErrorBoundaryProvider`. This component acts as a context and uses the 
+
+If you want to hide the component tree and display a global fallback error page for certain
+types of errors, you will need an `ErrorBoundaryProvider`. This component acts as a context and uses the
 previously configured `ErrorBoundaryReact`.
 We subscribe to the error service and track the relevant error types in order to show the error page accordingly.
 
 ```tsx title="src/domains/error/ErrorBoundaryProvider.tsx"
 import { injectForComponent } from "@/composition/container/AppInject"
-import { 
-  ErrorService, 
-  TOKEN_ERROR_SERVICE, 
-  ErrorBoundaryReact, 
-  ErrorMapped } from "@/core/Error"
+import {
+  ErrorService,
+  TOKEN_ERROR_SERVICE,
+  ErrorBoundaryReact,
+  ErrorMapped,
+} from "@/core/Error"
 import {
   PropsWithChildren,
   ReactElement,
@@ -602,12 +614,11 @@ export const ErrorBoundaryProvider = injectForComponent({
   errorService: TOKEN_ERROR_SERVICE,
 })(ErrorBoundaryProviderPrivate)
 
-
 export function ErrorBoundaryProviderPrivate({
-                                               children,
-                                               fallback,
-                                               errorService,
-                                             }: Props) {
+  children,
+  fallback,
+  errorService,
+}: Props) {
   const [error, setError] = useState<ErrorMapped | null>(null)
 
   useEffect(() => {
@@ -637,12 +648,17 @@ export function ErrorBoundaryProviderPrivate({
 ```
 
 ### Error Logging Service
-To send errors to the console or a monitoring system, you can use the `useErrorReporter` hook. 
+
+To send errors to the console or a monitoring system, you can use the `useErrorReporter` hook.
 It subscribes to the error stream from the service and processes errors similarly to the previous examples.
 
 ```ts title="src/domains/error/useErrorReporter.ts"
 import { injectForFn } from "@/composition/container/AppInject"
-import { type ErrorService, ErrorService, TOKEN_ERROR_SERVICE } from "@/core/Error"
+import {
+  type ErrorService,
+  ErrorService,
+  TOKEN_ERROR_SERVICE,
+} from "@/core/Error"
 import { useEffect } from "react"
 import { tap } from "rxjs"
 
@@ -670,26 +686,27 @@ function useErrorReporterPrivate({ errorService }: ErrorService) {
 ```
 
 ### Summary
-You can extend the system by introducing error factories and typing possible `ErrorMapped` codes. 
-Similar to `ErrorBoundary` and `useErrorReporter`, it is easy to add additional modules, for example, for filtering and 
+
+You can extend the system by introducing error factories and typing possible `ErrorMapped` codes.
+Similar to `ErrorBoundary` and `useErrorReporter`, it is easy to add additional modules, for example, for filtering and
 displaying toast notifications depending on the error type.
-The main advantage of our extensible system is the ability to build new modules 
+The main advantage of our extensible system is the ability to build new modules
 following a unified principle, which simplifies maintenance and project development.
 
 ## Other Domain Modules
 
 ### Throwing HTTP Response Schema Validation Errors
 
-Earlier, we defined the error type `ErrorSchema`. 
+Earlier, we defined the error type `ErrorSchema`.
 Using it as an example, we will demonstrate how to throw errors from other layers of the application according to our rules.
 
 ```ts title="src/domains/auth/AuthSchema.ts"
 import { injectable, inject } from "inversify"
-import { 
-  type ErrorService, 
-  type ErrorFactory, 
-  ErrorSchemaBaseFactory, 
-  TOKEN_ERROR_SERVICE 
+import {
+  type ErrorService,
+  type ErrorFactory,
+  ErrorSchemaBaseFactory,
+  TOKEN_ERROR_SERVICE,
 } from "@/core/Error"
 import * as v from "valibot"
 
@@ -700,7 +717,7 @@ export class AuthSchema {
 
   constructor(
     @inject(TOKEN_ERROR_SERVICE) private errorService: ErrorService,
-    @inject(ErrorSchemaBaseFactory) private errorFactory: ErrorFactory
+    @inject(ErrorSchemaBaseFactory) private errorFactory: ErrorFactory,
   ) {}
 
   private readonly meResponse = v.object({
@@ -740,17 +757,17 @@ export class AuthSchema {
 ```
 
 ### Summary
-It is important to clearly delineate which layers of the application have access 
-to `ErrorService` and `ErrorMapper`. At the `HTTP` layer, you can integrate a schema validator with configured error handling rules.
-Additionally, the `HTTP` layer itself can handle network errors according to its own rules, using a similar approach 
-and a unified error handling mechanism. 
-This approach ensures consistency and extensibility of the error handling system across all levels of the application.
 
+It is important to clearly delineate which layers of the application have access
+to `ErrorService` and `ErrorMapper`. At the `HTTP` layer, you can integrate a schema validator with configured error handling rules.
+Additionally, the `HTTP` layer itself can handle network errors according to its own rules, using a similar approach
+and a unified error handling mechanism.
+This approach ensures consistency and extensibility of the error handling system across all levels of the application.
 
 ## Conclusion
 
-In this article, we explored a comprehensive approach to error handling in modern applications, 
-building an architecture with clear contracts and flexible mechanisms for extension, and identified integration 
+In this article, we explored a comprehensive approach to error handling in modern applications,
+building an architecture with clear contracts and flexible mechanisms for extension, and identified integration
 specifics with different environments.
 Here is a brief overview of the main tools and modules:
 
@@ -768,6 +785,6 @@ Here is a brief overview of the main tools and modules:
 - `useErrorReporter` — a hook for logging or sending errors to monitoring systems.
 - `AuthSchema` — various layers in the application throw errors according to defined rules, using factories and the error service, ensuring consistency at the business logic level.
 
-This system is not a strict set of rules but a foundation. 
-Adapt it to your needs while preserving the core principles, and you will 
+This system is not a strict set of rules but a foundation.
+Adapt it to your needs while preserving the core principles, and you will
 have a reliable error handling mechanism regardless of the framework or environment specifics.

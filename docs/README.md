@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://brainfuljs.dev">
-<img src="https://github.com/user-attachments/assets/eec3e8ea-63dd-4e87-99e1-11ad09b2b9a6" height="150">
+<img src="https://github.com/brainfuljs/brainful/raw/main/art/brainfuljs.svg" height="150">
 </a>
 </p>
 
