@@ -103,9 +103,10 @@ export interface ErrorFactory<TParams = any, TError = any> {
 }
 ```
 
-### Маппер ошибок
+### Error Mapper
 
-В слое `domains` должен быть определён класс, похожий на паттерн `Adapter`, который приводит все ошибки к типу `ErrorMapped`:
+In the domains layer, there should be a class similar to the `Adapter` pattern that 
+converts all errors to the `ErrorMapped` type.
 
 ```ts title="src/core/error/types.ts"
 export interface ErrorMapper {
