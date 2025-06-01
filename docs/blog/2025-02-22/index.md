@@ -2,8 +2,10 @@
 slug: error-handling-fundamentals
 title: Error Handling Fundamentals
 authors: [GurovDmitriy, ElenaErokhina]
-tags: [RxJS, Inversify]
+tags: [ErrorHandling, RxJS, Inversify]
 ---
+
+![mib-interview](/img/blog/mib-interview.jpg)
 
 Error handling is a tricky task, frameworks provide basic solutions, but they rarely cover all scenarios.
 Errors come in various forms, and the handling logic is often duplicated and scattered throughout the code.

@@ -3,37 +3,42 @@ RxJS:
   permalink: /rxjs
   description: RxJS
 
-Inversion of Control:
+InversionOfControl:
   label: Inversion of Control
   permalink: /inversion-of-control
   description: Inversion of Control
 
-IoC Container:
+IoCContainer:
   label: IoC Container
   permalink: /ioc-container
   description: IoC Container
 
-Dependency Inversion:
+DependencyInversion:
   label: Dependency Inversion
   permalink: /dependency-inversion
   description: Dependency Inversion
 
-Dependency Injection:
+DependencyInjection:
   label: Dependency Injection
   permalink: /dependency-injection
   description: Dependency Injection
 
+ErrorHandling:
+  label: Error Handling
+  permalink: /error-handling
+  description: Error Handling
+
 Inversify:
   label: Inversify
-  permalink: /Inversify
+  permalink: /inversify
   description: Inversify
 
-Mark Seemann:
+MarkSeemann:
   label: Mark Seemann
-  permalink: /Mark Seemann
+  permalink: /mark-seemann
   description: Mark Seemann
 
-Remo H. Jansen:
+RemoHJansen:
   label: Remo H. Jansen
-  permalink: /Remo H. Jansen
+  permalink: /remo-h-jansen
   description: Remo H. Jansen

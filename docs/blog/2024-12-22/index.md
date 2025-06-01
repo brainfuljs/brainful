@@ -4,15 +4,17 @@ title: Inversion of Control
 authors: [GurovDmitriy]
 tags:
   [
-    Inversion of Control,
-    IoC Container,
-    Dependency Inversion,
-    Dependency Injection,
+    InversionOfControl,
+    IoCContainer,
+    DependencyInversion,
+    DependencyInjection,
     Inversify,
-    Mark Seemann,
-    Remo H. Jansen,
+    MarkSeemann,
+    RemoHJansen,
   ]
 ---
+
+![equilibrium-card-freedom](/img/blog/equilibrium-card-freedom.jpg)
 
 This article provides an overview of the key points that need to be covered when studying the topic of Inversion of Control.
 
