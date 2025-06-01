@@ -155,6 +155,15 @@ const config: Config = {
           ],
         },
         {
+          title: "Art",
+          items: [
+            {
+              label: "Logo by Prisyachev",
+              href: "https://t.me/prisyachev",
+            },
+          ],
+        },
+        {
           title: "More",
           items: [
             {

@@ -1,8 +1,17 @@
 GurovDmitriy:
   name: Gurov Dmitriy
-  title: Front-end Engineer
+  title: Frontend engineer
   url: https://github.com/GurovDmitriy
   image_url: https://github.com/gurovdmitriy.png
   page: true
   socials:
     github: GurovDmitriy
+
+ElenaErokhina:
+  name: Elena Erokhina
+  title: Frontend developer
+  url: https://github.com/alllenk1
+  image_url: https://avatars.githubusercontent.com/u/144250417?v=4
+  page: true
+  socials:
+    github: alllenk1

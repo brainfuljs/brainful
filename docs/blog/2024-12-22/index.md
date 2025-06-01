@@ -1,5 +1,5 @@
 ---
-slug: Inversion of Control
+slug: inversion-of-control
 title: Inversion of Control
 authors: [GurovDmitriy]
 tags:
@@ -327,6 +327,59 @@ container.bind(TYPES.Shuriken).to(Shuriken)
 // Resolve dependencies
 var ninja = container.get(TYPES.Ninja)
 return ninja
+```
+
+## In Framework
+
+For `React`, we could use `@injectable` and `@inject` decorators for independent modules, and alongside 
+them introduce several functions for injection into hooks and components.
+
+The `injectForComponent` function can be used to provide dependencies to components, 
+while `injectForFn` can be used for other functions or custom hooks.
+A more detailed example is covered in [this](/blog/error-handling-fundamentals) article.
+
+```tsx title="src/core/composition/container/AppInject.tsx"
+import { interfaces } from "inversify"
+import React from "react"
+import { container } from "./container"
+
+type ServiceIdentifier<T> = interfaces.ServiceIdentifier<T>
+
+export function injectForComponent<TDeps extends object>(dependencies: {
+  [K in keyof TDeps]: ServiceIdentifier<TDeps[K]>
+}) {
+  return function <P extends TDeps>(
+    ComponentWrapped: React.ComponentType<P>,
+  ): React.FC<Partial<Omit<P, keyof TDeps>>> {
+    return function appInjectedComponent(props: Omit<P, keyof TDeps>) {
+      const injectedProps = Object.keys(dependencies).reduce((acc, key) => {
+        acc[key as keyof TDeps] = container.get(
+          dependencies[key as keyof TDeps],
+        )
+        return acc
+      }, {} as TDeps)
+
+      return <ComponentWrapped {...(props as P)} {...injectedProps} />
+    }
+  }
+}
+
+export function injectForFn<TDeps extends object>(dependencies: {
+  [K in keyof TDeps]: ServiceIdentifier<TDeps[K]>
+}) {
+  return function <TResult>(hook: (deps: TDeps) => TResult): () => TResult {
+    return function appInjectedHook() {
+      const injectedDeps = Object.keys(dependencies).reduce((acc, key) => {
+        acc[key as keyof TDeps] = container.get(
+          dependencies[key as keyof TDeps],
+        )
+        return acc
+      }, {} as TDeps)
+
+      return hook(injectedDeps)
+    }
+  }
+}
 ```
 
 ## Conclusion
