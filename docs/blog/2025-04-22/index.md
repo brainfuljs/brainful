@@ -10,14 +10,14 @@ tags: [HttpCaching, Angular, Ramda]
 HTTP request caching is an important tool for improving performance and reducing server load.
 However, implementing caching often requires writing a large amount of repetitive code, as well as carefully designed
 logic to control cache lifetime and data updates.
-In this article, we will explore a simple way to organize request caching in Angular. This can be considered a 
+In this article, we will explore a simple way to organize request caching in Angular. This can be considered a
 starting point — the initial steps toward optimizing requests made through HttpClient. <!-- truncate -->
 
 We will implement data caching with limits on cache size and control over the lifetime of cached entries.
 In real-world projects, such a module can evolve and expand to provide much more extensive functionality, including complex
 strategies for updating, invalidation, and data synchronization.
-To ensure immutability of data structures and predictability of operations, we will use the [Immutable.js](https://immutable-js.com/) library. 
-This will make it easier to track state changes and prevent accidental data mutations. Additionally, for functional 
+To ensure immutability of data structures and predictability of operations, we will use the [Immutable.js](https://immutable-js.com/) library.
+This will make it easier to track state changes and prevent accidental data mutations. Additionally, for functional
 operations, we will apply the [Ramda](https://ramdajs.com/) library, which helps write clean and declarative code in a functional style.
 
 ## Interface Definitions
@@ -43,7 +43,6 @@ The `key` is a unique identifier that allows us to reliably identify and retriev
 
 Let's define the `HttpCacheConfig` interface, which allows configuring the main caching parameters.
 
-
 ```ts title="src/core/http/types.ts"
 export interface HttpCacheConfig {
   size: number
@@ -60,8 +59,7 @@ To enable injecting custom caching settings into the `HttpCache` service,
 we define a special `Angular` token `TOKEN_HTTP_CACHE_CONFIG`.
 This token will be used to inject the configuration via Dependency Injection
 
-
-```ts title="src/core/http/types.ts"
+```ts title="src/core/http/token.ts"
 export const TOKEN_HTTP_CACHE_CONFIG = new InjectionToken<HttpCacheConfig>(
   "app.config HttpCacheConfig",
 )
@@ -97,7 +95,7 @@ export class HttpCache {
       }
     }
   }
-  
+
   //...
 }
 ```
@@ -105,6 +103,7 @@ export class HttpCache {
 ### Class Fields Definition
 
 Let's add several important fields to the `HttpCache` class:
+
 - `cache` — an immutable `OrderedMap` object from the `Immutable.js` library, which will store cached data in an ordered manner.
 - `envService` — an environment service that we inject using the inject function. It will be used to filter requests and correctly handle only those related to our API.
 - `cacheKey` and `resetKey` — these are context tokens `HttpContextToken` that allow us to pass and modify unique cache keys within the context of a specific HTTP request via `HttpClient`.
@@ -121,7 +120,7 @@ export class HttpCache {
 
   cacheKey = new HttpContextToken<string | null>(() => null)
   resetKey = new HttpContextToken<string | null>(() => null)
-  
+
   //...
 }
 ```
@@ -131,10 +130,9 @@ export class HttpCache {
 Let's create the connect method, which will be used in the `HTTP interceptor` to handle requests and manage caching.
 Inside the method, we define several variables:
 `key` — a unique key used for reading from and writing to the cache for this request.
-`isTypeSkip` — a boolean variable that stores the result of checking whether the request type is suitable for caching 
+`isTypeSkip` — a boolean variable that stores the result of checking whether the request type is suitable for caching
 (for example, GET requests can be cached, while POST requests cannot).
 `cacheValue` — the current cached entry value, if it exists.
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -157,18 +155,17 @@ export class HttpCache {
 ```
 
 The `connect` method accepts the original HTTP request req and a next function to pass control to the next handler.
-Later, the logic will be implemented here to determine if the cache can be used for this request, and to either 
+Later, the logic will be implemented here to determine if the cache can be used for this request, and to either
 return cached data or perform the real HTTP request.
 This approach allows easy integration of caching into the HTTP request handling chain via `Angular's` Http Interceptor.
 
 ### Cache Reset via Context Key
 
-In some cases, after mutating data (for example, POST, PUT, DELETE requests), it is necessary to reset the cache for related GET requests 
-to ensure data freshness. 
+In some cases, after mutating data (for example, POST, PUT, DELETE requests), it is necessary to reset the cache for related GET requests
+to ensure data freshness.
 To achieve this, we implement a cache reset mechanism by a key passed through the HTTP request context.
-In the connect method, we add a call to the `_resetCacheByKey` function, which checks for the presence of a 
+In the connect method, we add a call to the `_resetCacheByKey` function, which checks for the presence of a
 special key in the request context and, if found, removes the corresponding cache entry.
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -208,13 +205,12 @@ Later in the article, we can demonstrate an example of using this case by passin
 
 ### Determining the Request Type
 
-Before applying caching, it is necessary to determine whether the HTTP request type is suitable for caching. 
+Before applying caching, it is necessary to determine whether the HTTP request type is suitable for caching.
 In our case, we will cache only GET requests directed to our application’s API.
 In the connect method, we add a call to a private method `_getIsTypeReqSkip`, which checks:
 Whether the request method is GET.
 Whether the request URL starts with the base API address (to avoid caching third-party requests).
 If the request is not suitable for caching, we immediately pass it along without processing.
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -251,14 +247,12 @@ export class HttpCache {
 The `_getIsTypeReqSkip` method returns true if the request is not suitable for caching, and false if processing can continue.
 This filter helps avoid unnecessary caching of POST, PUT, DELETE, and other request types, as well as requests to external services.
 
-
 ### Cache Invalidation
 
-To read or store an entry in the cache, we need to compute a unique key. This key 
+To read or store an entry in the cache, we need to compute a unique key. This key
 can be passed through `HttpClient` context tokens, or if absent, we use the request URL with its parameters.
-After obtaining the key, the `_invalidateCache` method is called. It checks whether there is a cache 
+After obtaining the key, the `_invalidateCache` method is called. It checks whether there is a cache
 entry with this key and whether its lifetime has expired. If the entry is outdated, it is removed from the cache.
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -313,13 +307,11 @@ If the cache lifetime is not set or equals zero, the cache is considered permane
 When the lifetime expires, the entry is removed from the cache to avoid returning stale data.
 This approach allows effective management of cache entry lifetimes and prevents the use of outdated information.
 
-
 ### Cache Handling
 
-Now let's implement the logic that checks for the presence of a valid cached entry and returns it if available. 
+Now let's implement the logic that checks for the presence of a valid cached entry and returns it if available.
 If the cache is missing or expired, the actual HTTP request is executed, and the received response is saved into the cache.
 When adding a new entry, we also control the cache size: if it exceeds the specified limit, the oldest entry is removed
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -389,20 +381,19 @@ export class HttpCache {
 }
 ```
 
-If a valid cache entry `cacheValue` is found, we return its cloned copy using of() from `RxJS` to comply with the `Observable` contract. The of operator 
-creates an `Observable` that emits the given value and then completes, 
+If a valid cache entry `cacheValue` is found, we return its cloned copy using of() from `RxJS` to comply with the `Observable` contract. The of operator
+creates an `Observable` that emits the given value and then completes,
 making it ideal for returning static cached data as an `Observable` stream.
 If the cache is missing, the next handler `next(req)` is called to perform the actual HTTP request.
-After receiving a response of type `HttpEventType.Response`, we call `_removeOverSizeCache()` to control the cache 
+After receiving a response of type `HttpEventType.Response`, we call `_removeOverSizeCache()` to control the cache
 size and `_installNewCache()` to save the new response.
 The `_removeOverSizeCache` method uses `Ramda` to check if the cache size limit is exceeded, and if so, removes the oldest (last inserted) entry.
 The `_installNewCache` method adds a new entry to the `OrderedMap` with the current timestamp.
 
 ### Defining Helper Functions for Working with Context
 
-To simplify working with `HttpContext` in Angular's `HttpClient`, let's define two helper functions that 
+To simplify working with `HttpContext` in Angular's `HttpClient`, let's define two helper functions that
 make it easy to create contexts with the necessary keys for caching and cache resetting.
-
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -421,7 +412,7 @@ export class HttpCache {
 }
 ```
 
-The `setCtxCacheKey` function creates a new instance of `HttpContext` and sets the cacheKey in it. Such a context 
+The `setCtxCacheKey` function creates a new instance of `HttpContext` and sets the cacheKey in it. Such a context
 can be passed along with an HTTP request to control caching behavior.
 Similarly, `setCtxResetKey` creates a context with the `resetKey`, which is used to trigger cache invalidation.
 Using these helper functions simplifies working with the context and allows centralized management of caching keys within the application.
@@ -430,9 +421,8 @@ Using these helper functions simplifies working with the context and allows cent
 
 ### Connecting to the Interceptor
 
-To integrate our caching module into Angular’s HTTP request processing chain, 
+To integrate our caching module into Angular’s HTTP request processing chain,
 we create an HTTP interceptor that calls the connect method of the `HttpCache` class.
-
 
 ```ts title="src/core/http/http-cache.interceptor.ts"
 export const httpCacheInterceptor: HttpInterceptorFn = (req, next) => {
@@ -446,7 +436,6 @@ export const httpCacheInterceptor: HttpInterceptorFn = (req, next) => {
 
 To configure caching parameters, you can define your own configuration object that overrides the default values.
 
-
 ```ts title="src/domains/http/http-cache.config.ts"
 export const httpCacheConfig: HttpCacheConfig = {
   size: 10,
@@ -456,7 +445,7 @@ export const httpCacheConfig: HttpCacheConfig = {
 
 ### Setting Up Providers
 
-To apply your custom caching configuration and register the HTTP interceptor that uses the `HttpCache` service, 
+To apply your custom caching configuration and register the HTTP interceptor that uses the `HttpCache` service,
 you need to configure providers in your `Angular` app.
 
 ```ts title="src/composition/provider/app-http-client.provider.ts"
@@ -478,11 +467,10 @@ export function appHttpClientProvider(): Provider | EnvironmentProviders {
 
 ### Using Keys
 
-Now, in API services, we can explicitly specify keys for caching requests if the default key based on 
-the URL does not suit us. This allows more flexible cache management: overriding keys for storing data and defining 
+Now, in API services, we can explicitly specify keys for caching requests if the default key based on
+the URL does not suit us. This allows more flexible cache management: overriding keys for storing data and defining
 dependencies between requests.
 For example, when updating user data `meUpdate`, we can reset the cache for the related GET request `me` by using a pre-defined key.
-
 
 ```ts title="src/domanins/auth/auth-api.service.ts"
 @Injectable({
@@ -515,19 +503,20 @@ export class AuthApiService {
 ```
 
 In the `me()` method, we explicitly set the cache key `auth/me` via the request context to store the response under this key.
-In the `meUpdate()` method, when sending a POST request, we specify the key for cache reset — `auth/me`. This ensures that after a 
+In the `meUpdate()` method, when sending a POST request, we specify the key for cache reset — `auth/me`. This ensures that after a
 successful update, the user data will be re-fetched and the cache will be refreshed.
 This approach allows creating dependencies between requests and controlling the freshness of cached data.
-Using Angular `HttpClient` context with keys provides flexibility and precision in cache management, especially in complex applications 
+Using Angular `HttpClient` context with keys provides flexibility and precision in cache management, especially in complex applications
 with many interrelated data.
 
 ## Conclusion
 
-In this article, we examined a basic implementation of HTTP request caching in `Angular` using [Immutable.js](https://immutable-js.com/) and 
-[Ramda](https://ramdajs.com/) for convenient and reliable data handling. We created a simple yet flexible module that allows controlling cache size, 
-entry lifetime, and provides the ability to reset the cache by keys. This approach serves as an excellent starting point for building 
+In this article, we examined a basic implementation of HTTP request caching in `Angular` using [Immutable.js](https://immutable-js.com/) and
+[Ramda](https://ramdajs.com/) for convenient and reliable data handling. We created a simple yet flexible module that allows controlling cache size,
+entry lifetime, and provides the ability to reset the cache by keys. This approach serves as an excellent starting point for building
 more complex and scalable caching solutions in your applications.
 
 You can see the cache in action and access the full code:
+
 - [FWC-Angular GitHub](https://github.com/GurovDmitriy/fwc-angular)
 - [FWC-Angular Website](https://gurovdmitriy.github.io/fwc-angular/)

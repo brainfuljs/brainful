@@ -105,7 +105,7 @@ export interface ErrorFactory<TParams = any, TError = any> {
 
 ### Error Mapper
 
-In the domains layer, there should be a class similar to the `Adapter` pattern that 
+In the domains layer, there should be a class similar to the `Adapter` pattern that
 converts all errors to the `ErrorMapped` type.
 
 ```ts title="src/core/error/types.ts"
