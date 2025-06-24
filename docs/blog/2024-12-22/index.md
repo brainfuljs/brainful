@@ -9,6 +9,7 @@ tags:
     DependencyInversion,
     DependencyInjection,
     Inversify,
+    React,
     MarkSeemann,
     RemoHJansen,
   ]

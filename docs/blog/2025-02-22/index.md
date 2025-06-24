@@ -2,7 +2,7 @@
 slug: error-handling-fundamentals
 title: Error Handling Fundamentals
 authors: [GurovDmitriy, ElenaErokhina]
-tags: [ErrorHandling, RxJS, Inversify]
+tags: [ErrorHandling, RxJS, Inversify, React, Angular]
 ---
 
 ![mib-interview](/img/blog/mib-interview.jpg)

@@ -3,6 +3,21 @@ RxJS:
   permalink: /rxjs
   description: RxJS
 
+Ramda:
+  label: Ramda
+  permalink: /ramda
+  description: Ramda
+
+Angular:
+  label: Angular
+  permalink: /angular
+  description: Angular
+
+React:
+  label: React
+  permalink: /react
+  description: React
+
 InversionOfControl:
   label: Inversion of Control
   permalink: /inversion-of-control
@@ -23,15 +38,20 @@ DependencyInjection:
   permalink: /dependency-injection
   description: Dependency Injection
 
+Inversify:
+  label: Inversify
+  permalink: /inversify
+  description: Inversify
+
 ErrorHandling:
   label: Error Handling
   permalink: /error-handling
   description: Error Handling
 
-Inversify:
-  label: Inversify
-  permalink: /inversify
-  description: Inversify
+HttpCaching:
+  label: Http Caching
+  permalink: /http-caching
+  description: Http Caching
 
 MarkSeemann:
   label: Mark Seemann
