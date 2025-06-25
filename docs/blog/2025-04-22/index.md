@@ -22,7 +22,7 @@ operations, we will apply the [Ramda](https://ramdajs.com/) library, which helps
 
 ## Interface Definitions
 
-### Interface for Cache Item
+### HttpCacheValue Interface
 
 To implement HTTP request caching in `Angular`, we need a structure that stores the response data along with additional information.
 Let's create the `HttpCacheValue` interface, which describes a single cache entry.
@@ -39,7 +39,7 @@ The `data` field represents the full response of type `HttpResponse`.
 The `date` field stores the timestamp when the cache entry was created — later we will use it to control the lifetime of each cache item.
 The `key` is a unique identifier that allows us to reliably identify and retrieve the cached request.
 
-### Interface for Module Configuration
+### HttpCacheConfig Interface
 
 Let's define the `HttpCacheConfig` interface, which allows configuring the main caching parameters.
 
@@ -57,7 +57,7 @@ The `time` property defines how long a cached entry is considered valid — afte
 
 To enable injecting custom caching settings into the `HttpCache` service,
 we define a special `Angular` token `TOKEN_HTTP_CACHE_CONFIG`.
-This token will be used to inject the configuration via Dependency Injection
+This token will be used to inject the configuration via Dependency Injection.
 
 ```ts title="src/core/http/token.ts"
 export const TOKEN_HTTP_CACHE_CONFIG = new InjectionToken<HttpCacheConfig>(
@@ -78,6 +78,8 @@ To achieve this, we will use `Angular’s` dependency injection with an optional
   providedIn: "root",
 })
 export class HttpCache {
+  private envService = inject(TOKEN_ENV)
+  
   private readonly config: HttpCacheConfig = {
     size: 5,
     time: 30 * 1000,
@@ -100,13 +102,14 @@ export class HttpCache {
 }
 ```
 
+The `envService` — an environment service that we inject using the inject function. It will be used to filter 
+requests and correctly handle only those related to our API.
+
 ### Class Fields Definition
 
 Let's add several important fields to the `HttpCache` class:
-
 - `cache` — an immutable `OrderedMap` object from the `Immutable.js` library, which will store cached data in an ordered manner.
-- `envService` — an environment service that we inject using the inject function. It will be used to filter requests and correctly handle only those related to our API.
-- `cacheKey` and `resetKey` — these are context tokens `HttpContextToken` that allow us to pass and modify unique cache keys within the context of a specific HTTP request via `HttpClient`.
+- `tokenKeyCacheSave` and `tokenKeyCacheReset` — these are context tokens `HttpContextToken` that allow us to pass and modify unique cache keys within the context of a specific HTTP request via `HttpClient`.
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -115,11 +118,12 @@ Let's add several important fields to the `HttpCache` class:
 export class HttpCache {
   //...
 
-  private cache = OrderedMap<string, HttpCacheValue>()
   private envService = inject(TOKEN_ENV)
 
-  cacheKey = new HttpContextToken<string | null>(() => null)
-  resetKey = new HttpContextToken<string | null>(() => null)
+  private cache = OrderedMap<string, HttpCacheValue>()
+
+  tokenKeyCacheSave = new HttpContextToken<string | null>(() => null)
+  tokenKeyCacheReset = new HttpContextToken<string | null>(() => null)
 
   //...
 }
@@ -127,12 +131,7 @@ export class HttpCache {
 
 ### Defining the Method for Integration with HttpInterceptor
 
-Let's create the connect method, which will be used in the `HTTP interceptor` to handle requests and manage caching.
-Inside the method, we define several variables:
-`key` — a unique key used for reading from and writing to the cache for this request.
-`isTypeSkip` — a boolean variable that stores the result of checking whether the request type is suitable for caching
-(for example, GET requests can be cached, while POST requests cannot).
-`cacheValue` — the current cached entry value, if it exists.
+Let's create the connect method, which will be used in the HTTP Interceptor to handle requests and manage caching.
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -145,10 +144,6 @@ export class HttpCache {
     req: HttpRequest<unknown>,
     next: HttpHandlerFn,
   ): Observable<HttpEvent<unknown>> {
-    let key = ""
-    let isTypeSkip = true
-    let cacheValue: HttpCacheValue | undefined = undefined
-
     //...
   }
 }
@@ -159,58 +154,16 @@ Later, the logic will be implemented here to determine if the cache can be used 
 return cached data or perform the real HTTP request.
 This approach allows easy integration of caching into the HTTP request handling chain via `Angular's` Http Interceptor.
 
-### Cache Reset via Context Key
+### Cache Checking Steps
 
-In some cases, after mutating data (for example, POST, PUT, DELETE requests), it is necessary to reset the cache for related GET requests
-to ensure data freshness.
-To achieve this, we implement a cache reset mechanism by a key passed through the HTTP request context.
-In the connect method, we add a call to the `_resetCacheByKey` function, which checks for the presence of a
-special key in the request context and, if found, removes the corresponding cache entry.
+Let's first describe the logic of how we will work with the cache using pseudo-functions, and then proceed to implement these functions.
+- The `_removeCache` function checks if there is an HTTP context token to reset the cache, for example, related to some POST request.
+- Next, with `_getIsTypeReqSkip`, we check if the request type is suitable for caching — for example, we only cache GET requests.
+- The `_getKeyCache` function is needed to correctly obtain the cache key for checking or later saving.
+- Then we check if the cache for this request has expired using `_getIsExpireCache`.
+- If it has not expired, we return the cached value.
+- If the cache is missing or expired, we perform the actual request, save the response, and also check with `_getIsOverSizeCache` whether the cache size exceeds the limit defined in the settings.
 
-```ts title="src/core/http/http-cache.ts"
-@Injectable({
-  providedIn: "root",
-})
-export class HttpCache {
-  //...
-
-  connect(
-    req: HttpRequest<unknown>,
-    next: HttpHandlerFn,
-  ): Observable<HttpEvent<unknown>> {
-    let key = ""
-    let isTypeSkip = true
-    let cacheValue: HttpCacheValue | undefined = undefined
-
-    this._resetCacheByKey(req)
-
-    //...
-  }
-
-  private _resetCacheByKey(req: HttpRequest<unknown>): void {
-    const key = req.context.get(this.resetKey)
-    if (key) this._cacheRemove(key)
-  }
-
-  private _cacheRemove(key: string) {
-    this.cache = this.cache.remove(key)
-  }
-}
-```
-
-The `_resetCacheByKey` method looks into the request context `req.context` for the `resetKey`.
-If the key is present, `_cacheRemove` is called to delete the corresponding entry from the `OrderedMap` cache.
-This mechanism allows, for example, after a successful data update, to clear stale cache so that subsequent GET requests will fetch fresh data.
-Later in the article, we can demonstrate an example of using this case by passing the key through `HttpContext` in Angular's `HttpClient`.
-
-### Determining the Request Type
-
-Before applying caching, it is necessary to determine whether the HTTP request type is suitable for caching.
-In our case, we will cache only GET requests directed to our application’s API.
-In the connect method, we add a call to a private method `_getIsTypeReqSkip`, which checks:
-Whether the request method is GET.
-Whether the request URL starts with the base API address (to avoid caching third-party requests).
-If the request is not suitable for caching, we immediately pass it along without processing.
 
 ```ts title="src/core/http/http-cache.ts"
 @Injectable({
@@ -223,172 +176,37 @@ export class HttpCache {
     req: HttpRequest<unknown>,
     next: HttpHandlerFn,
   ): Observable<HttpEvent<unknown>> {
-    let key = ""
-    let isTypeSkip = true
-    let cacheValue: HttpCacheValue | undefined = undefined
+    this._removeCache(this._getKeyResetFromCtx(req))
 
-    this._resetCacheByKey(req)
+    if (this._getIsTypeReqSkip(req)) return next(req)
 
-    isTypeSkip = this._getIsTypeReqSkip(req)
-    if (isTypeSkip) return next(req)
+    const key = this._getKeyCache(req)
 
-    //...
-  }
+    if (R.isEmpty(key)) return next(req)
 
-  private _getIsTypeReqSkip(req: HttpRequest<unknown>): boolean {
-    if (req.method !== "GET") return true
-    if (!req.url.startsWith(this.envService.apiUrl)) return true
-
-    return false
-  }
-}
-```
-
-The `_getIsTypeReqSkip` method returns true if the request is not suitable for caching, and false if processing can continue.
-This filter helps avoid unnecessary caching of POST, PUT, DELETE, and other request types, as well as requests to external services.
-
-### Cache Invalidation
-
-To read or store an entry in the cache, we need to compute a unique key. This key
-can be passed through `HttpClient` context tokens, or if absent, we use the request URL with its parameters.
-After obtaining the key, the `_invalidateCache` method is called. It checks whether there is a cache
-entry with this key and whether its lifetime has expired. If the entry is outdated, it is removed from the cache.
-
-```ts title="src/core/http/http-cache.ts"
-@Injectable({
-  providedIn: "root",
-})
-export class HttpCache {
-  //...
-
-  connect(
-    req: HttpRequest<unknown>,
-    next: HttpHandlerFn,
-  ): Observable<HttpEvent<unknown>> {
-    let key = ""
-    let isTypeSkip = true
-    let cacheValue: HttpCacheValue | undefined = undefined
-
-    this._resetCacheByKey(req)
-
-    isTypeSkip = this._getIsTypeReqSkip(req)
-    if (isTypeSkip) return next(req)
-
-    key = this._getCacheKey(req)
-    cacheValue = this._invalidateCache(key)
-
-    //...
-  }
-
-  private _getCacheKey(req: HttpRequest<unknown>): string {
-    return req.context.get(this.cacheKey) ?? req.urlWithParams
-  }
-
-  private _invalidateCache(key: string): HttpCacheValue | undefined {
     const cacheValue = this.cache.get(key)
-    const limit = this.config.time > 0 ? this.config.time : 0
 
-    if (R.isNil(cacheValue)) return undefined
-    if (limit === 0) return cacheValue
-
-    if (R.gte(Date.now() - cacheValue.date, limit)) {
-      this._cacheRemove(key)
-      return undefined
-    }
-
-    return cacheValue
-  }
-}
-```
-
-The `_getCacheKey` method tries to obtain the key from the request context; if it is not set, it uses the full URL with parameters.
-In `_invalidateCache`, `Ramda` functions are used to check the presence of a cache entry and its validity based on time.
-If the cache lifetime is not set or equals zero, the cache is considered permanent.
-When the lifetime expires, the entry is removed from the cache to avoid returning stale data.
-This approach allows effective management of cache entry lifetimes and prevents the use of outdated information.
-
-### Cache Handling
-
-Now let's implement the logic that checks for the presence of a valid cached entry and returns it if available.
-If the cache is missing or expired, the actual HTTP request is executed, and the received response is saved into the cache.
-When adding a new entry, we also control the cache size: if it exceeds the specified limit, the oldest entry is removed
-
-```ts title="src/core/http/http-cache.ts"
-@Injectable({
-  providedIn: "root",
-})
-export class HttpCache {
-  //...
-
-  connect(
-    req: HttpRequest<unknown>,
-    next: HttpHandlerFn,
-  ): Observable<HttpEvent<unknown>> {
-    let key = ""
-    let isTypeSkip = true
-    let cacheValue: HttpCacheValue | undefined = undefined
-
-    this._resetCacheByKey(req)
-
-    isTypeSkip = this._getIsTypeReqSkip(req)
-    if (isTypeSkip) return next(req)
-
-    key = this._getCacheKey(req)
-    cacheValue = this._invalidateCache(key)
-
-    if (cacheValue) {
+    if (cacheValue && R.not(this._getIsExpireCache(cacheValue))) {
       return of(cacheValue.data.clone()).pipe(
         tap(() => {
           console.log("HttpCache: from cache")
         }),
       )
-    } else {
-      return next(req).pipe(
-        tap((event) => {
-          if (event.type === HttpEventType.Response) {
-            this._removeOverSizeCache()
-            this._installNewCache(key, event.clone())
-          }
-        }),
-      )
     }
-  }
 
-  private _removeOverSizeCache(): void {
-    const getIsSizeOver = R.ifElse(
-      () => R.gt(this.config.size, 0),
-      () => R.gte(this.cache.size, this.config.size),
-      () => false,
+    return next(req).pipe(
+      tap((event) => {
+        if (event.type === HttpEventType.Response) {
+          this._saveCache(key, event.clone())
+          if (this._getIsOverSizeCache()) this._removeCacheLast()
+        }
+      }),
     )
-
-    const getNewCache = R.ifElse(
-      (oldKey: string | undefined) =>
-        R.and(R.isNotNil(oldKey), getIsSizeOver()),
-      (oldKey: string | undefined) => this.cache.remove(oldKey as string),
-      () => this.cache,
-    )
-
-    this.cache = getNewCache(this.cache.keySeq().last())
-  }
-
-  private _installNewCache(key: string, data: HttpResponse<unknown>): void {
-    this.cache = this.cache.set(key, {
-      data,
-      date: Date.now(),
-      key,
-    })
   }
 }
 ```
 
-If a valid cache entry `cacheValue` is found, we return its cloned copy using of() from `RxJS` to comply with the `Observable` contract. The of operator
-creates an `Observable` that emits the given value and then completes,
-making it ideal for returning static cached data as an `Observable` stream.
-If the cache is missing, the next handler `next(req)` is called to perform the actual HTTP request.
-After receiving a response of type `HttpEventType.Response`, we call `_removeOverSizeCache()` to control the cache
-size and `_installNewCache()` to save the new response.
-The `_removeOverSizeCache` method uses `Ramda` to check if the cache size limit is exceeded, and if so, removes the oldest (last inserted) entry.
-The `_installNewCache` method adds a new entry to the `OrderedMap` with the current timestamp.
+That’s it — a brief overview of our small algorithm for working with cached requests. Below, we will proceed to implement the functions.
 
 ### Defining Helper Functions for Working with Context
 
@@ -402,20 +220,165 @@ make it easy to create contexts with the necessary keys for caching and cache re
 export class HttpCache {
   //...
 
-  setCtxCacheKey(key: string): HttpContext {
-    return new HttpContext().set(this.cacheKey, key)
+  setKeyCacheSaveCtx(key: string): HttpContext {
+    return new HttpContext().set(this.tokenKeyCacheSave, key)
   }
 
-  setCtxResetKey(key: string): HttpContext {
-    return new HttpContext().set(this.resetKey, key)
+  setKeyCacheResetCtx(key: string): HttpContext {
+    return new HttpContext().set(this.tokenKeyCacheReset, key)
   }
 }
 ```
 
-The `setCtxCacheKey` function creates a new instance of `HttpContext` and sets the cacheKey in it. Such a context
+The `setKeyCacheSaveFromCtx` function creates a new instance of `HttpContext` and sets the cacheKey in it. Such a context
 can be passed along with an HTTP request to control caching behavior.
-Similarly, `setCtxResetKey` creates a context with the `resetKey`, which is used to trigger cache invalidation.
+Similarly, `setKeyCacheResetFromCtx` creates a context with the `resetKey`, which is used to trigger cache invalidation.
 Using these helper functions simplifies working with the context and allows centralized management of caching keys within the application.
+
+### Saving and Removing Cache
+
+Let's define functions for how we can save and remove cache entries.
+
+```ts title="src/core/http/http-cache.ts"
+@Injectable({
+  providedIn: "root",
+})
+export class HttpCache {
+  //...
+
+  private _saveCache(key: string, data: HttpResponse<unknown>): void {
+    this.cache = this.cache.set(key, {
+      data,
+      date: Date.now(),
+      key,
+    })
+  }
+
+  private _removeCache(key: string | null | undefined): void {
+    if (key) {
+      this.cache = this.cache.remove(key)
+    }
+  }
+
+  private _removeCacheLast(): void {
+    R.when(
+      (key: string | undefined): key is string => R.isNotNil(key),
+      (key) => this._removeCache(key),
+    )(this.cache.keySeq().first())
+  }
+}
+```
+
+- The `_saveCache` method saves a new cache entry with the current timestamp.
+- The `_removeCache` method removes a cache entry by its key if the key is defined.
+- The `_removeCacheLast` method removes the oldest cache entry, the first key in the sequence, if it exists, using Ramda's when and isNotNil helpers.
+
+### Retrieving Cache Keys
+
+These functions help us extract the key from the provided `HttpContext` or, by default, from the URL,
+as well as obtain the key for cache invalidation on demand.
+
+```ts title="src/core/http/http-cache.ts"
+@Injectable({
+  providedIn: "root",
+})
+export class HttpCache {
+  //...
+
+  private _getKeyCache(req: HttpRequest<unknown>): string {
+    return req.context.get(this.tokenKeyCacheSave) ?? req.urlWithParams
+  }
+
+  private _getKeyResetFromCtx(req: HttpRequest<unknown>): string | null {
+    return req.context.get(this.tokenKeyCacheReset)
+  }
+}
+```
+
+The `_getKeyCache` method returns the cache key from the request context token `tokenKeyCacheSave`, or falls back to the full 
+URL with parameters if the token is not set.
+The `_getKeyResetFromCtx` method retrieves the cache reset key from the request context token `tokenKeyCacheReset`, or returns null if not present.
+
+### Skipping Request Types
+
+Let's define a function that filters request types suitable for caching.
+
+```ts title="src/core/http/http-cache.ts"
+@Injectable({
+  providedIn: "root",
+})
+export class HttpCache {
+  //...
+
+  private _getIsTypeReqSkip(req: HttpRequest<unknown>): boolean {
+    return R.cond([
+      [
+        (req: HttpRequest<unknown>) =>
+          R.complement(R.equals)(req.method, "GET"),
+        () => true,
+      ],
+      [(req) => R.not(req.url.startsWith(this.envService.apiUrl)), () => true],
+      [R.T, () => false],
+    ])(req)
+  }
+}
+```
+
+The `_getIsTypeReqSkip` method returns true if the request method is not GET or if the request URL 
+does not start with the configured API base URL, indicating the request should be skipped for caching.
+Otherwise, it returns false, meaning the request is suitable for caching.
+
+### Cache Size Limit
+
+Let's check whether the number of entries in the cache exceeds the configured limit.
+
+```ts title="src/core/http/http-cache.ts"
+@Injectable({
+  providedIn: "root",
+})
+export class HttpCache {
+  //...
+
+  private _getIsOverSizeCache(): boolean {
+    return R.ifElse(
+      () => R.gt(this.config.size, 0),
+      () => R.gt(this.cache.size, this.config.size),
+      () => true,
+    )()
+  }
+}
+```
+
+The `_getIsOverSizeCache` method returns true if the cache size limit `this.config.size` is set and the current cache size exceeds it.
+If the configured size is zero or not set, the cache is considered unlimited, and the method returns true by default.
+
+### Expiration of HttpCacheValue
+
+Let's check whether a cache entry has expired.
+
+```ts title="src/core/http/http-cache.ts"
+@Injectable({
+  providedIn: "root",
+})
+export class HttpCache {
+  //...
+
+  private _getIsExpireCache(value: HttpCacheValue | null | undefined): boolean {
+    if (R.isNil(value)) return true
+
+    return R.ifElse(
+      () => R.gt(this.config.time, 0),
+      () => R.gt(Date.now() - value.date, this.config.time),
+      () => true,
+    )()
+  }
+}
+```
+
+The `_getIsExpireCache` method returns true if the cache entry is null or undefined, indicating it is expired or missing.
+If a cache lifetime `this.config.time` is set and greater than zero, it checks whether the elapsed time since the cache entry was saved 
+exceeds this lifetime.
+If no lifetime is set, the cache is considered expired by default.
 
 ## Integration
 
@@ -483,7 +446,7 @@ export class AuthApiService {
   me(): Observable<AuthUser> {
     return this.httpClient
       .get<AuthUser>(`${this.envService.apiUrl}/auth/me`, {
-        context: this.httpCache.setCtxCacheKey("auth/me"),
+        context: this.httpCache.setKeyCacheSaveCtx("auth/me"),
       })
       .pipe(map((value) => this.schema.me(value)))
   }
@@ -493,7 +456,7 @@ export class AuthApiService {
       `${this.envService.apiUrl}/auth/me-update`,
       payload,
       {
-        context: this.httpCache.setCtxResetKey("auth/me"),
+        context: this.httpCache.setKeyCacheResetCtx("auth/me"),
       },
     )
   }
