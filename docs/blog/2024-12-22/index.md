@@ -17,6 +17,8 @@ tags:
 
 ![equilibrium-card-freedom](/img/blog/equilibrium-card-freedom.jpg)
 
+*(updated 2025-08-22)*
+
 This article provides an overview of the key points that need to be covered when studying the topic of Inversion of Control.
 
 Inversion of Control (IoC) is a fundamental design principle in software engineering that shifts the
@@ -345,53 +347,50 @@ return ninja
 ## In Framework
 
 For `React`, we could use `@injectable` and `@inject` decorators for independent modules, and alongside
-them introduce several functions for injection into hooks and components.
+them introduce container provider into application.
 
-The `injectForComponent` function can be used to provide dependencies to components,
-while `injectForFn` can be used for other functions or custom hooks.
 A more detailed example is covered in [this](/blog/error-handling-fundamentals) article.
 
-```tsx title="src/core/composition/container/AppInject.tsx"
-import { interfaces } from "inversify"
-import React from "react"
+```tsx title="src/core/composition/container/ContainerProvider.tsx"
+import { ServiceIdentifier } from "inversify"
+import { createContext, type PropsWithChildren, use, useRef } from "react"
 import { container } from "./container"
 
-type ServiceIdentifier<T> = interfaces.ServiceIdentifier<T>
-
-export function injectForComponent<TDeps extends object>(dependencies: {
-  [K in keyof TDeps]: ServiceIdentifier<TDeps[K]>
-}) {
-  return function <P extends TDeps>(
-    ComponentWrapped: React.ComponentType<P>,
-  ): React.FC<Partial<Omit<P, keyof TDeps>>> {
-    return function appInjectedComponent(props: Omit<P, keyof TDeps>) {
-      const injectedProps = Object.keys(dependencies).reduce((acc, key) => {
-        acc[key as keyof TDeps] = container.get(
-          dependencies[key as keyof TDeps],
-        )
-        return acc
-      }, {} as TDeps)
-
-      return <ComponentWrapped {...(props as P)} {...injectedProps} />
-    }
-  }
+export interface ContainerProviderContextMethods {
+  inject<TType = any, TToken = unknown>(
+    serviceIdentifier: ServiceIdentifier<TToken>,
+  ): TType
 }
 
-export function injectForFn<TDeps extends object>(dependencies: {
-  [K in keyof TDeps]: ServiceIdentifier<TDeps[K]>
-}) {
-  return function <TResult>(hook: (deps: TDeps) => TResult): () => TResult {
-    return function appInjectedHook() {
-      const injectedDeps = Object.keys(dependencies).reduce((acc, key) => {
-        acc[key as keyof TDeps] = container.get(
-          dependencies[key as keyof TDeps],
-        )
-        return acc
-      }, {} as TDeps)
+export const ContainerProviderContext =
+  createContext<ContainerProviderContextMethods | null>(null)
 
-      return hook(injectedDeps)
-    }
+export function ContainerProvider({ children }: PropsWithChildren) {
+  const methods = useRef({
+    inject<TType = any, TToken = unknown>(
+      serviceIdentifier: ServiceIdentifier<TToken>,
+    ) {
+      return container.get<TType>(serviceIdentifier)
+    },
+  })
+
+  return (
+    <ContainerProviderContext value={methods.current}>
+      {children}
+    </ContainerProviderContext>
+  )
+}
+
+export function useAppInject<TType = any, TToken = unknown>(
+  serviceIdentifier: ServiceIdentifier<TToken>,
+) {
+  const ctx = use(ContainerProviderContext)
+
+  if (ctx === null) {
+    throw new Error("DI ctx not found")
   }
+
+  return ctx.inject<TType, TToken>(serviceIdentifier)
 }
 ```
 
